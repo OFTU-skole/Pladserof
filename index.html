@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bordplan Generator - Sky-synkroniseret</title>
+  
+  <!-- Firebase SDK Libraries -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    
+    /* Dynamisk dvh sikrer at bunden ikke klippes af på Android/Galaxy Tablets */
+    html, body { 
+      background: #f4f6f8; 
+      margin: 0; 
+      padding: 0; 
+      color: #333; 
+      height: 100vh;
+      height: 100dvh; 
+      overflow: hidden; 
+    }
+
+    /* LOGIN MODAL OVERLAY */
+    #login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .login-card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 360px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .login-card h2 { margin: 0; font-size: 20px; color: #0f172a; text-align: center; }
+    .login-card p { margin: 0; font-size: 13px; color: #64748b; text-align: center; }
+
+    .input-group { display: flex; flex-direction: column; gap: 5px; }
+    .input-group label { font-size: 12px; font-weight: 600; color: #475569; }
+    .input-group input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+
+    .login-actions { display: flex; gap: 10px; margin-top: 5px; }
+
+    /* Hovedlayout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+    }
+
+    /* Venstre Sidepanel */
+    .sidebar {
+      width: 340px;
+      min-width: 340px;
+      background: white;
+      border-right: 2px solid #e2e8f0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+      overflow-y: auto;
+      z-index: 20;
+    }
+
+    .user-badge-bar {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #0369a1;
+      font-weight: 600;
+    }
+
+    .logout-btn-sm {
+      background: #38bdf8;
+      color: #0c4a6e;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      width: auto;
+    }
+    .logout-btn-sm:hover { background: #0284c7; color: white; }
+
+    h1 { margin: 0; font-size: 18px; color: #0f172a; }
+    .subtitle { color: #64748b; margin: 0 0 4px 0; font-size: 12px; }
+
+    /* Kontroller */
+    .control-section {
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 500; }
+    
+    button { background: #2563eb; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; width: 100%; }
+    button:hover { background: #1d4ed8; }
+    button.success { background: #059669; }
+    button.success:hover { background: #047857; }
+    button.print-btn { background: #0284c7; }
+    button.print-btn:hover { background: #0369a1; }
+    button.secondary { background: #e2e8f0; color: #1e293b; }
+    button.secondary:hover { background: #cbd5e1; }
+    
+    label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
+    input[type="number"] { width: 60px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+
+    /* Tællere */
+    .counter-bar { display: flex; gap: 6px; }
+    .counter-badge {
+      flex: 1;
+      padding: 5px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      text-align: center;
+    }
+    .counter-badge.piger { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+    .counter-badge.drenge { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .counter-badge.total { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+    /* Historik Sektion */
+    .history-panel {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-title { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .history-list { display: flex; flex-direction: column; gap: 6px; }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      font-size: 12px;
+    }
+    .history-actions { display: flex; gap: 4px; }
+    .btn-sm { padding: 3px 6px; font-size: 11px; width: auto; }
+
+    /* Højre Hovedområde */
+    .main-content {
+      flex: 1;
+      background: #cbd5e1;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Klasseværelse skærm */
+    .room-container {
+      background: #ffffff;
+      border: 4px solid #64748b;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      flex: 1;
+      background-image: 
+        linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+      background-size: 20px 20px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+      transition: all 0.2s ease-out;
+    }
+
+    .board-indicator {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #cbd5e1;
+      color: #475569;
+      padding: 4px 24px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      z-index: 10;
+    }
+
+    /* ELEV-PANEL OPTIMERET TIL TABLETS */
+    .bottom-student-panel {
+      background: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #cbd5e1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+      z-index: 40;
+      flex-shrink: 0;
+    }
+
+    .bottom-student-panel:not(.collapsed) {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      width: calc(100% - 24px);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .panel-header-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      width: auto;
+    }
+    .toggle-btn:hover { background: #e2e8f0; }
+
+    .panel-body { display: flex; flex-direction: column; gap: 8px; }
+    .bottom-student-panel.collapsed .panel-body { display: none; }
+
+    .student-form { display: flex; gap: 8px; flex-wrap: wrap; }
+    .student-form input { flex: 1; min-width: 140px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+    .student-form select { padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+    .student-form button { width: auto; }
+
+    .sort-controls { display: flex; gap: 6px; }
+    .sort-btn {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      width: auto;
+    }
+    .sort-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+    .student-list { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+      gap: 6px; 
+      max-height: 150px; 
+      overflow-y: auto; 
+      padding-right: 4px; 
+    }
+    .student-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; }
+    .student-item.Pige { border-left: 3px solid #ec4899; }
+    .student-item.Dreng { border-left: 3px solid #3b82f6; }
+    .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; width: auto; padding: 0 4px; }
+
+    /* Bord Stylings */
+    .table {
+      position: absolute;
+      width: 200px;
+      background: white;
+      border: 2px solid #64748b;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    .table:active { cursor: grabbing; z-index: 100 !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); }
+    
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .rotate-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      width: auto;
+    }
+    .rotate-btn:hover { background: #e2e8f0; }
+
+    .seats { display: flex; flex-direction: column; gap: 6px; }
+    .seat { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 6px; background: #f8fafc; border: 1px solid #cbd5e1; font-size: 13px; }
+    .seat.Pige { border-left: 4px solid #ec4899; }
+    .seat.Dreng { border-left: 4px solid #3b82f6; }
+    .seat-info { display: flex; align-items: center; gap: 6px; pointer-events: none; }
+    .gender-badge { font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
+    .Pige .gender-badge { background: #fce7f3; color: #be185d; }
+    .Dreng .gender-badge { background: #dbeafe; color: #1d4ed8; }
+    
+    .lock-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px; width: auto; }
+
+    #print-student-list { display: none; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 15mm; }
+      body { background: white !important; overflow: visible !important; }
+      .app-container, #login-overlay { display: none !important; }
+      #print-student-list { display: block !important; width: 100% !important; font-family: system-ui, -apple-system, sans-serif !important; }
+      .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px; }
+      .print-header h2 { margin: 0 0 5px 0; font-size: 20px; color: #0f172a; }
+      .print-header p { margin: 0; font-size: 12px; color: #64748b; }
+      .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+      .print-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+      .print-table th, .print-table td { border: 1px solid #64748b; padding: 8px 10px; text-align: left; }
+      .print-table th { background-color: #f1f5f9 !important; font-size: 13px; font-weight: bold; color: #1e293b; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .print-table td.student-name-cell { font-size: 14px !important; font-weight: 600; width: 45%; color: #0f172a; }
+      .print-table td.comment-cell { width: 55%; height: 38px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN & OPRET BRUGER OVERLAY -->
+  <div id="login-overlay">
+    <div class="login-card">
+      <h2>Bordplan Generator</h2>
+      <p>Log ind for at hente dine gemte bordplaner fra skyen, eller opret en ny profil.</p>
+      
+      <div class="input-group">
+        <label>Brugernavn</label>
+        <input type="text" id="usernameInput" placeholder="f.eks. Mette" autocomplete="off">
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="passwordInput" placeholder="Velvalgt kodeord">
+      </div>
+
+      <div class="login-actions">
+        <button onclick="handleLogin()">🔑 Log ind</button>
+        <button class="secondary" onclick="handleRegister()">➕ Opret ny bruger</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- VENSTRE SIDEMENU -->
+    <div class="sidebar">
+      <div class="user-badge-bar">
+        <span>👤 <span id="currentUsernameText">...</span></span>
+        <button class="logout-btn-sm" onclick="logout()">🚪 Log ud</button>
+      </div>
+
+      <div>
+        <h1>Bordplaner</h1>
+        <p class="subtitle" id="studentCountText">Indlæser fra skyen...</p>
+      </div>
+
+      <!-- Primære Handlinger -->
+      <button onclick="generateSeating()">🎲 Generér nye pladser</button>
+      <button class="success" onclick="saveCurrentToHistory()">🔒 Gem & Lås til Historik</button>
+      <button class="print-btn" onclick="printStudentList()">📋 Udskriv elevliste</button>
+      
+      <label class="control-row">
+        <span>Pige/Dreng-par pr. bord</span>
+        <input type="checkbox" id="mixGender" checked>
+      </label>
+      <label class="control-row">
+        <span>Undgå tidligere bordmakkere</span>
+        <input type="checkbox" id="avoidRepeats" checked>
+      </label>
+
+      <!-- Historik Sektion -->
+      <div class="history-panel">
+        <div class="history-title">Låste Historiske Bordplaner (Max 5)</div>
+        <div class="history-list" id="historyList">
+          <em style="font-size: 11px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>
+        </div>
+      </div>
+
+      <!-- Rum & Bord Indstillinger -->
+      <div class="control-section">
+        <div class="control-row">
+          <span>Antal Borde:</span>
+          <input type="number" id="tableCountInput" min="1" max="25" value="11" onchange="updateTableCount(this.value)">
+        </div>
+        <label class="control-row">
+          <span>Lås til 20px Grid</span>
+          <input type="checkbox" id="gridSnapToggle" checked>
+        </label>
+      </div>
+
+      <!-- Tællere -->
+      <div class="counter-bar">
+        <div class="counter-badge total">Total: <span id="countTotal">0</span></div>
+        <div class="counter-badge piger">♀ <span id="countPiger">0</span></div>
+        <div class="counter-badge drenge">♂ <span id="countDrenge">0</span></div>
+      </div>
+
+      <button class="secondary" style="margin-top: auto;" onclick="resetToDefault()">🔄 Nulstil alt for denne bruger</button>
+    </div>
+
+    <!-- HØJRE KLASSELOKALE OMRAADE -->
+    <div class="main-content">
+      <div class="room-container" id="room">
+        <div class="board-indicator">TAVLE / KATEDER</div>
+      </div>
+
+      <!-- ELEV-PANEL -->
+      <div class="bottom-student-panel collapsed" id="studentPanel">
+        <div class="panel-header-toggle" onclick="toggleStudentPanel()">
+          <strong style="font-size: 14px; color: #0f172a;">Administrer Elever & Sortering</strong>
+          <button class="toggle-btn" id="togglePanelBtn">🔼 Vis Elevliste</button>
+        </div>
+
+        <div class="panel-body">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <form class="student-form" onsubmit="addStudent(event)">
+              <input type="text" id="newName" placeholder="Elevens navn" required>
+              <select id="newGender">
+                <option value="Pige">♀ Pige</option>
+                <option value="Dreng">♂ Dreng</option>
+              </select>
+              <button type="submit">➕ Tilføj elev</button>
+            </form>
+
+            <div class="sort-controls">
+              <span style="font-size: 12px; color: #64748b; align-self: center;">Sorter efter:</span>
+              <button class="sort-btn active" id="sortDefault" onclick="setSortMode('default')">Standard</button>
+              <button class="sort-btn" id="sortAlpha" onclick="setSortMode('alpha')">A-Å</button>
+              <button class="sort-btn" id="sortGender" onclick="setSortMode('gender')">Køn</button>
+            </div>
+          </div>
+
+          <div class="student-list" id="studentList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="print-student-list"></div>
+
+  <script>
+    // ==========================================
+    // 1. FIREBASE KONFIGURATION (Indsæt dine oplysninger her)
+    // ==========================================
+    const firebaseConfig = {
+  apiKey: "AIzaSyB1QWv4fooXl9_9YLqC60Z-83nxvzJYCns",
+  authDomain: "bordplaner-of.firebaseapp.com",
+  databaseURL: "https://bordplaner-of-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "bordplaner-of",
+  storageBucket: "bordplaner-of.firebasestorage.app",
+  messagingSenderId: "588083894965",
+  appId: "1:588083894965:web:607a75078c1460eef63cfc"
+};
+
+    // Initialiser Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ==========================================
+    // 2. STANDARD DATA & VARIABLER
+    // ==========================================
+    const DEFAULT_STUDENTS = [
+      { id: 1, name: "Alma", gender: "Pige", locked: false, seatIndex: 0 },
+      { id: 2, name: "Sofia", gender: "Pige", locked: false, seatIndex: 1 },
+      { id: 3, name: "Ella", gender: "Pige", locked: false, seatIndex: 2 },
+      { id: 4, name: "Freja", gender: "Pige", locked: false, seatIndex: 3 },
+      { id: 5, name: "Clara", gender: "Pige", locked: false, seatIndex: 4 },
+      { id: 6, name: "Emma", gender: "Pige", locked: false, seatIndex: 5 },
+      { id: 7, name: "Mia", gender: "Pige", locked: false, seatIndex: 6 },
+      { id: 8, name: "Ida", gender: "Pige", locked: false, seatIndex: 7 },
+      { id: 9, name: "Anna", gender: "Pige", locked: false, seatIndex: 8 },
+      { id: 10, name: "Laura", gender: "Pige", locked: false, seatIndex: 9 },
+      { id: 11, name: "Maja", gender: "Pige", locked: false, seatIndex: 10 },
+      { id: 12, name: "Oscar", gender: "Dreng", locked: false, seatIndex: 11 },
+      { id: 13, name: "Karl", gender: "Dreng", locked: false, seatIndex: 12 },
+      { id: 14, name: "Noah", gender: "Dreng", locked: false, seatIndex: 13 },
+      { id: 15, name: "William", gender: "Dreng", locked: false, seatIndex: 14 },
+      { id: 16, name: "Lucas", gender: "Dreng", locked: false, seatIndex: 15 },
+      { id: 17, name: "Victor", gender: "Dreng", locked: false, seatIndex: 16 },
+      { id: 18, name: "Malthe", gender: "Dreng", locked: false, seatIndex: 17 },
+      { id: 19, name: "Emil", gender: "Dreng", locked: false, seatIndex: 18 },
+      { id: 20, name: "Alfred", gender: "Dreng", locked: false, seatIndex: 19 },
+      { id: 21, name: "Oliver", gender: "Dreng", locked: false, seatIndex: 20 },
+      { id: 22, name: "Magnus", gender: "Dreng", locked: false, seatIndex: 21 }
+    ];
+
+    let currentUser = null;
+    let currentUserDisplay = '';
+    let students = [];
+    let tableStates = [];
+    let historyVersions = [];
+    let totalTables = 11;
+    let currentSort = 'default';
+    const GRID_SIZE = 20;
+
+    function cleanUsername(name) {
+      return name.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
+    }
+
+    function checkActiveSession() {
+      const active = localStorage.getItem('app_active_user');
+      const activeDisplay = localStorage.getItem('app_active_user_display');
+      if (active) {
+        currentUser = active;
+        currentUserDisplay = activeDisplay || active;
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('currentUsernameText').innerText = currentUserDisplay;
+        loadUserDataFromCloud();
+      } else {
+        document.getElementById('login-overlay').style.display = 'flex';
+      }
+    }
+
+    function handleRegister() {
+      const uInput = document.getElementById('usernameInput').value.trim();
+      const pInput = document.getElementById('passwordInput').value.trim();
+
+      if (!uInput || !pInput) {
+        alert("Udfyld venligst både brugernavn og password.");
+        return;
+      }
+
+      const key = cleanUsername(uInput);
+      const userRef = db.ref('users/' + key);
+
+      userRef.once('value', snapshot => {
+        if (snapshot.exists()) {
+          alert("Dette brugernavn er allerede optaget i skyen. Vælg et andet eller log ind.");
+        } else {
+          const newUserObj = {
+            username: uInput,
+            password: pInput,
+            students: DEFAULT_STUDENTS,
+            tableStates: [],
+            totalTables: 11,
+            historyVersions: [],
+            panelCollapsed: true
+          };
+
+          userRef.set(newUserObj, err => {
+            if (err) {
+              alert("Kunne ikke oprette bruger i skyen: " + err.message);
+            } else {
+              loginUser(key, uInput);
+            }
+          });
+        }
+      });
+    }
+
+    function handleLogin() {
+      const uInput = document.getElementById('usernameInput').value.trim();
+      const pInput = document.getElementById('passwordInput').value.trim();
+
+      if (!uInput || !pInput) {
+        alert("Indtast både brugernavn og password.");
+        return;
+      }
+
+      const key = cleanUsername(uInput);
+      const userRef = db.ref('users/' + key);
+
+      userRef.once('value', snapshot => {
+        if (!snapshot.exists()) {
+          alert("Brugeren findes ikke. Opret en ny profil.");
+          return;
+        }
+
+        const data = snapshot.val();
+        if (data.password !== pInput) {
+          alert("Forkert password.");
+          return;
+        }
+
+        loginUser(key, data.username || uInput);
+      });
+    }
+
+    function loginUser(key, displayName) {
+      currentUser = key;
+      currentUserDisplay = displayName;
+
+      localStorage.setItem('app_active_user', key);
+      localStorage.setItem('app_active_user_display', displayName);
+
+      document.getElementById('currentUsernameText').innerText = displayName;
+      document.getElementById('login-overlay').style.display = 'none';
+
+      document.getElementById('usernameInput').value = '';
+      document.getElementById('passwordInput').value = '';
+
+      loadUserDataFromCloud();
+    }
+
+    function logout() {
+      localStorage.removeItem('app_active_user');
+      localStorage.removeItem('app_active_user_display');
+      currentUser = null;
+      document.getElementById('login-overlay').style.display = 'flex';
+    }
+
+    function loadUserDataFromCloud() {
+      if (!currentUser) return;
+
+      const userRef = db.ref('users/' + currentUser);
+      userRef.once('value', snapshot => {
+        const userData = snapshot.val();
+        if (!userData) return;
+
+        students = userData.students || JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+        totalTables = userData.totalTables || 11;
+        historyVersions = userData.historyVersions || [];
+        tableStates = userData.tableStates || [];
+
+        document.getElementById('tableCountInput').value = totalTables;
+
+        if (userData.panelCollapsed === false) {
+          document.getElementById('studentPanel').classList.remove('collapsed');
+          document.getElementById('togglePanelBtn').innerText = '🔽 Skjul Elevliste';
+        } else {
+          document.getElementById('studentPanel').classList.add('collapsed');
+          document.getElementById('togglePanelBtn').innerText = '🔼 Vis Elevliste';
+        }
+
+        if (tableStates.length === 0) {
+          generateDefaultGridPositions();
+        }
+
+        setTimeout(() => clampTablesInsideRoom(), 100);
+        render();
+      });
+    }
+
+    function saveData() {
+      if (!currentUser) return;
+
+      const userRef = db.ref('users/' + currentUser);
+      const isCollapsed = document.getElementById('studentPanel').classList.contains('collapsed');
+
+      userRef.update({
+        students: students,
+        tableStates: tableStates,
+        totalTables: totalTables,
+        historyVersions: historyVersions,
+        panelCollapsed: isCollapsed
+      });
+    }
+
+    function printStudentList() {
+      const printContainer = document.getElementById('print-student-list');
+      const dateStr = new Date().toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
+      
+      let sortedList = [...students].sort((a, b) => a.name.localeCompare(b.name, 'da'));
+      
+      const halfLength = Math.ceil(sortedList.length / 2);
+      const col1 = sortedList.slice(0, halfLength);
+      const col2 = sortedList.slice(halfLength);
+
+      let html = `
+        <div class="print-header">
+          <h2>Elevliste & Notater (${currentUserDisplay})</h2>
+          <p>Dato: ${dateStr} — Antal elever: ${students.length}</p>
+        </div>
+        <div class="print-grid">
+      `;
+
+      const renderTableColumn = (list) => {
+        let tableHtml = `
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>Elevens Navn</th>
+                <th>Kommentarer / Notater</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        list.forEach(student => {
+          const genderSymbol = student.gender === 'Pige' ? '♀' : '♂';
+          tableHtml += `
+            <tr>
+              <td class="student-name-cell">${student.name} <span style="font-size: 11px; color: #64748b; font-weight: normal;">(${genderSymbol})</span></td>
+              <td class="comment-cell"></td>
+            </tr>
+          `;
+        });
+        tableHtml += `</tbody></table>`;
+        return tableHtml;
+      };
+
+      html += renderTableColumn(col1);
+      html += renderTableColumn(col2);
+      html += `</div>`;
+
+      printContainer.innerHTML = html;
+      window.print();
+    }
+
+    function toggleStudentPanel() {
+      const panel = document.getElementById('studentPanel');
+      const btn = document.getElementById('togglePanelBtn');
+      panel.classList.toggle('collapsed');
+
+      if (panel.classList.contains('collapsed')) {
+        btn.innerText = '🔼 Vis Elevliste';
+      } else {
+        btn.innerText = '🔽 Skjul Elevliste';
+      }
+
+      saveData();
+      setTimeout(() => clampTablesInsideRoom(), 220);
+    }
+
+    function clampTablesInsideRoom() {
+      const room = document.getElementById('room');
+      if (!room) return;
+      const roomW = room.clientWidth;
+      const roomH = room.clientHeight;
+
+      const estimatedTableWidth = 200;
+      const estimatedTableHeight = 110;
+
+      tableStates.forEach(state => {
+        if (!state) return;
+        const maxLeft = Math.max(0, roomW - estimatedTableWidth);
+        const maxTop = Math.max(0, roomH - estimatedTableHeight);
+
+        if (state.x > maxLeft) state.x = Math.floor(maxLeft / GRID_SIZE) * GRID_SIZE;
+        if (state.y > maxTop) state.y = Math.floor(maxTop / GRID_SIZE) * GRID_SIZE;
+      });
+      render();
+    }
+
+    function generateDefaultGridPositions() {
+      tableStates = [];
+      const room = document.getElementById('room');
+      const roomW = room ? room.clientWidth : 900;
+      const cols = Math.floor((roomW - 80) / 220) || 4;
+      const startX = 40, startY = 60;
+      const stepX = 220, stepY = 140;
+
+      for (let i = 0; i < totalTables; i++) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        tableStates.push({
+          x: Math.round((startX + col * stepX) / GRID_SIZE) * GRID_SIZE,
+          y: Math.round((startY + row * stepY) / GRID_SIZE) * GRID_SIZE,
+          rotation: 0
+        });
+      }
+    }
+
+    function updateTableCount(newCount) {
+      totalTables = Math.max(1, parseInt(newCount, 10) || 1);
+      const room = document.getElementById('room');
+      const roomW = room ? room.clientWidth : 900;
+      
+      while (tableStates.length < totalTables) {
+        const i = tableStates.length;
+        const cols = Math.floor((roomW - 80) / 220) || 4;
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        tableStates.push({ 
+          x: Math.round((40 + col * 220) / GRID_SIZE) * GRID_SIZE, 
+          y: Math.round((60 + row * 140) / GRID_SIZE) * GRID_SIZE, 
+          rotation: 0 
+        });
+      }
+
+      saveData();
+      render();
+    }
+
+    function rotateTable(tIndex, e) {
+      e.stopPropagation();
+      if (!tableStates[tIndex]) return;
+      tableStates[tIndex].rotation = ((tableStates[tIndex].rotation || 0) + 45) % 360;
+      saveData();
+      render();
+    }
+
+    function toggleLock(studentId) {
+      const student = students.find(s => s.id === studentId);
+      if (student) {
+        student.locked = !student.locked;
+        saveData();
+        render();
+      }
+    }
+
+    function addStudent(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('newName');
+      const genderSelect = document.getElementById('newGender');
+
+      students.push({
+        id: Date.now(),
+        name: nameInput.value.trim(),
+        gender: genderSelect.value,
+        locked: false,
+        seatIndex: students.length
+      });
+
+      nameInput.value = '';
+      saveData();
+      render();
+    }
+
+    function removeStudent(id) {
+      students = students.filter(s => s.id !== id);
+      students.forEach((s, idx) => s.seatIndex = idx);
+      saveData();
+      render();
+    }
+
+    function setSortMode(mode) {
+      currentSort = mode;
+      document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+      if (mode === 'default') document.getElementById('sortDefault').classList.add('active');
+      if (mode === 'alpha') document.getElementById('sortAlpha').classList.add('active');
+      if (mode === 'gender') document.getElementById('sortGender').classList.add('active');
+      render();
+    }
+
+    function resetToDefault() {
+      if (confirm("Nulstil alt for denne bruger til standard?")) {
+        totalTables = 11;
+        historyVersions = [];
+        document.getElementById('tableCountInput').value = 11;
+        
+        students = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+        generateDefaultGridPositions();
+        saveData();
+        render();
+      }
+    }
+
+    function shuffle(array) {
+      let arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function saveCurrentToHistory() {
+      const timestamp = new Date().toLocaleString('da-DK', { dateStyle: 'short', timeStyle: 'short' });
+      
+      const newVersion = {
+        id: Date.now(),
+        title: `Version ${historyVersions.length + 1} (${timestamp})`,
+        students: JSON.parse(JSON.stringify(students))
+      };
+
+      historyVersions.unshift(newVersion);
+      if (historyVersions.length > 5) {
+        historyVersions = historyVersions.slice(0, 5);
+      }
+
+      saveData();
+      render();
+      alert(`Bordplanen er nu låst og gemt i historikken (${newVersion.title}).`);
+    }
+
+    function loadHistoryVersion(versionId) {
+      const version = historyVersions.find(v => v.id === versionId);
+      if (version) {
+        students = JSON.parse(JSON.stringify(version.students));
+        saveData();
+        render();
+      }
+    }
+
+    function deleteHistoryVersion(versionId, e) {
+      e.stopPropagation();
+      historyVersions = historyVersions.filter(v => v.id !== versionId);
+      saveData();
+      render();
+    }
+
+    function getHistoricalPairs() {
+      const pairSet = new Set();
+      historyVersions.forEach(ver => {
+        const verStudents = ver.students;
+        for (let t = 0; t < totalTables; t++) {
+          const s1 = verStudents.find(s => s.seatIndex === t * 2);
+          const s2 = verStudents.find(s => s.seatIndex === t * 2 + 1);
+
+          if (s1 && s2) {
+            const key = [s1.id, s2.id].sort().join('-');
+            pairSet.add(key);
+          }
+        }
+      });
+      return pairSet;
+    }
+
+    function generateSeating() {
+      const mixGender = document.getElementById('mixGender').checked;
+      const avoidRepeats = document.getElementById('avoidRepeats').checked;
+      const historicalPairs = avoidRepeats ? getHistoricalPairs() : new Set();
+
+      let bestSeating = null;
+      let lowestPenalty = Infinity;
+
+      for (let attempt = 0; attempt < 400; attempt++) {
+        let currentStudents = JSON.parse(JSON.stringify(students));
+        let unassigned = currentStudents.filter(s => !s.locked);
+        
+        let tables = [];
+        for (let t = 0; t < totalTables; t++) {
+          let seat1Idx = t * 2;
+          let seat2Idx = t * 2 + 1;
+
+          let s1 = currentStudents.find(s => s.seatIndex === seat1Idx);
+          let s2 = currentStudents.find(s => s.seatIndex === seat2Idx);
+
+          tables.push({
+            tableIndex: t,
+            seat1: { index: seat1Idx, student: s1 && s1.locked ? s1 : null },
+            seat2: { index: seat2Idx, student: s2 && s2.locked ? s2 : null }
+          });
+        }
+
+        let penalty = 0;
+
+        if (mixGender) {
+          let girls = shuffle(unassigned.filter(s => s.gender === 'Pige'));
+          let boys = shuffle(unassigned.filter(s => s.gender === 'Dreng'));
+
+          tables.forEach(table => {
+            let seats = [table.seat1, table.seat2];
+            let seatedGirls = seats.filter(s => s.student && s.student.gender === 'Pige').length;
+            let seatedBoys = seats.filter(s => s.student && s.student.gender === 'Dreng').length;
+
+            seats.forEach(seat => {
+              if (!seat.student) {
+                if (seatedGirls === 0 && girls.length > 0) {
+                  seat.student = girls.pop();
+                  seatedGirls++;
+                } 
+                else if (seatedBoys === 0 && boys.length > 0) {
+                  seat.student = boys.pop();
+                  seatedBoys++;
+                } 
+                else {
+                  seat.student = girls.pop() || boys.pop();
+                }
+
+                if (seat.student) {
+                  seat.student.seatIndex = seat.index;
+                }
+              }
+            });
+
+            if (table.seat1.student && table.seat2.student) {
+              const pairKey = [table.seat1.student.id, table.seat2.student.id].sort().join('-');
+              if (historicalPairs.has(pairKey)) {
+                penalty += 10;
+              }
+            }
+          });
+
+        } else {
+          let shuffledUnassigned = shuffle(unassigned);
+          let openSeatIndexes = [];
+
+          tables.forEach(table => {
+            if (!table.seat1.student) openSeatIndexes.push(table.seat1.index);
+            if (!table.seat2.student) openSeatIndexes.push(table.seat2.index);
+          });
+
+          openSeatIndexes = shuffle(openSeatIndexes);
+
+          shuffledUnassigned.forEach((student, i) => {
+            if (openSeatIndexes[i] !== undefined) {
+              student.seatIndex = openSeatIndexes[i];
+            }
+          });
+
+          tables.forEach(table => {
+            const s1 = currentStudents.find(s => s.seatIndex === table.seat1.index);
+            const s2 = currentStudents.find(s => s.seatIndex === table.seat2.index);
+            if (s1 && s2) {
+              const pairKey = [s1.id, s2.id].sort().join('-');
+              if (historicalPairs.has(pairKey)) {
+                penalty += 10;
+              }
+            }
+          });
+        }
+
+        if (penalty < lowestPenalty) {
+          lowestPenalty = penalty;
+          bestSeating = currentStudents;
+          if (penalty === 0) break;
+        }
+      }
+
+      if (bestSeating) {
+        students = bestSeating;
+      }
+
+      saveData();
+      render();
+    }
+
+    function render() {
+      const piger = students.filter(s => s.gender === 'Pige').length;
+      const drenge = students.filter(s => s.gender === 'Dreng').length;
+
+      document.getElementById('countTotal').innerText = students.length;
+      document.getElementById('countPiger').innerText = piger;
+      document.getElementById('countDrenge').innerText = drenge;
+
+      document.getElementById('studentCountText').innerText = 
+        `${students.length} elever (${piger} piger, ${drenge} drenge)`;
+
+      // Render Historik
+      const historyList = document.getElementById('historyList');
+      if (historyVersions.length === 0) {
+        historyList.innerHTML = `<em style="font-size: 11px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>`;
+      } else {
+        historyList.innerHTML = '';
+        historyVersions.forEach(ver => {
+          const item = document.createElement('div');
+          item.className = 'history-item';
+          item.innerHTML = `
+            <span><strong>${ver.title}</strong></span>
+            <div class="history-actions">
+              <button class="btn-sm" onclick="loadHistoryVersion(${ver.id})">Vis</button>
+              <button class="btn-sm secondary" onclick="deleteHistoryVersion(${ver.id}, event)" style="color:#ef4444;">✕</button>
+            </div>
+          `;
+          historyList.appendChild(item);
+        });
+      }
+
+      // Render Klasselokale
+      const room = document.getElementById('room');
+      const existingTables = room.querySelectorAll('.table');
+      existingTables.forEach(t => t.remove());
+
+      for (let t = 0; t < totalTables; t++) {
+        const state = tableStates[t] || { x: 20 + (t % 4) * 220, y: 50 + Math.floor(t / 4) * 140, rotation: 0 };
+        
+        const tableDiv = document.createElement('div');
+        tableDiv.className = 'table';
+        tableDiv.style.left = `${state.x}px`;
+        tableDiv.style.top = `${state.y}px`;
+        tableDiv.style.transform = `rotate(${state.rotation || 0}deg)`;
+        tableDiv.dataset.tableIndex = t;
+
+        tableDiv.innerHTML = `
+          <div class="table-header">
+            <span>BORD ${t + 1}</span>
+            <button class="rotate-btn" onclick="rotateTable(${t}, event)">🔄 45°</button>
+          </div>`;
+        
+        const seatsDiv = document.createElement('div');
+        seatsDiv.className = 'seats';
+
+        [0, 1].forEach(posIdx => {
+          const seatIdx = t * 2 + posIdx;
+          const student = students.find(s => s.seatIndex === seatIdx);
+          const seatDiv = document.createElement('div');
+
+          if (student) {
+            seatDiv.className = `seat ${student.gender}`;
+            seatDiv.innerHTML = `
+              <div class="seat-info">
+                <span class="gender-badge">${student.gender[0]}</span>
+                <strong>${student.name}</strong>
+              </div>
+              <button class="lock-btn" onclick="toggleLock(${student.id})">
+                ${student.locked ? '🔒' : '🔓'}
+              </button>
+            `;
+          } else {
+            seatDiv.className = 'seat';
+            seatDiv.innerHTML = `<em>Tom plads</em>`;
+          }
+          seatsDiv.appendChild(seatDiv);
+        });
+
+        tableDiv.appendChild(seatsDiv);
+        makeDraggableAndSnappable(tableDiv);
+        room.appendChild(tableDiv);
+      }
+
+      // Render Elevliste
+      const studentList = document.getElementById('studentList');
+      studentList.innerHTML = '';
+
+      let sortedStudents = [...students];
+      if (currentSort === 'alpha') {
+        sortedStudents.sort((a, b) => a.name.localeCompare(b.name, 'da'));
+      } else if (currentSort === 'gender') {
+        sortedStudents.sort((a, b) => a.gender.localeCompare(b.gender, 'da') || a.name.localeCompare(b.name, 'da'));
+      }
+
+      sortedStudents.forEach(student => {
+        const item = document.createElement('div');
+        item.className = `student-item ${student.gender}`;
+        item.innerHTML = `
+          <span><strong>${student.name}</strong> (${student.gender[0]})</span>
+          <button class="delete-btn" onclick="removeStudent(${student.id})">✕</button>
+        `;
+        studentList.appendChild(item);
+      });
+    }
+
+    function makeDraggableAndSnappable(element) {
+      let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+      const currentIdx = parseInt(element.dataset.tableIndex, 10);
+
+      element.onpointerdown = function(e) {
+        if (e.target.tagName === 'BUTTON' || e.target.classList.contains('rotate-btn')) return;
+        
+        e.preventDefault();
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = element.offsetLeft;
+        initialTop = element.offsetTop;
+
+        document.onpointermove = function(e) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+
+          const room = document.getElementById('room');
+          const maxLeft = room.clientWidth - element.offsetWidth;
+          const maxTop = room.clientHeight - element.offsetHeight;
+
+          let newLeft = Math.max(0, Math.min(initialLeft + dx, maxLeft));
+          let newTop = Math.max(0, Math.min(initialTop + dy, maxTop));
+
+          const useGridSnap = document.getElementById('gridSnapToggle').checked;
+
+          if (useGridSnap) {
+            newLeft = Math.round(newLeft / GRID_SIZE) * GRID_SIZE;
+            newTop = Math.round(newTop / GRID_SIZE) * GRID_SIZE;
+          }
+
+          element.style.left = `${newLeft}px`;
+          element.style.top = `${newTop}px`;
+
+          if (tableStates[currentIdx]) {
+            tableStates[currentIdx].x = newLeft;
+            tableStates[currentIdx].y = newTop;
+          }
+        };
+
+        document.onpointerup = function() {
+          document.onpointermove = null;
+          document.onpointerup = null;
+          saveData();
+        };
+      };
+    }
+
+    window.addEventListener('resize', () => {
+      clampTablesInsideRoom();
+    });
+
+    checkActiveSession();
+  </script>
+</body>
+</html>
