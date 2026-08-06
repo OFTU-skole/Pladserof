@@ -12,7 +12,6 @@
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     
-    /* Dynamisk dvh sikrer at bunden ikke klippes af på Android/Galaxy Tablets */
     html, body { 
       background: #f4f6f8; 
       margin: 0; 
@@ -299,14 +298,16 @@
     .student-item.Dreng { border-left: 3px solid #3b82f6; }
     .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; width: auto; padding: 0 4px; }
 
-    /* Bord Stylings */
+    /* ==========================================
+       NYT BORD LAYOUT (VERTIKALT DELT: VENSTRE / HØJRE)
+       ========================================== */
     .table {
       position: absolute;
-      width: 200px;
+      width: 210px;
       background: white;
       border: 2px solid #64748b;
       border-radius: 8px;
-      padding: 8px;
+      padding: 6px;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
       cursor: grab;
       user-select: none;
@@ -318,17 +319,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: #64748b;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      padding: 0 2px;
     }
 
     .rotate-btn {
       background: #f1f5f9;
       color: #334155;
       border: 1px solid #cbd5e1;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
       font-size: 10px;
       font-weight: 600;
@@ -337,16 +339,57 @@
     }
     .rotate-btn:hover { background: #e2e8f0; }
 
-    .seats { display: flex; flex-direction: column; gap: 6px; }
-    .seat { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 6px; background: #f8fafc; border: 1px solid #cbd5e1; font-size: 13px; }
-    .seat.Pige { border-left: 4px solid #ec4899; }
-    .seat.Dreng { border-left: 4px solid #3b82f6; }
-    .seat-info { display: flex; align-items: center; gap: 6px; pointer-events: none; }
-    .gender-badge { font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
+    /* Vertikal opdeling (Side om side) med stiplet midterlinje */
+    .seats {
+      display: flex;
+      flex-direction: row;
+      gap: 4px;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 4px;
+    }
+
+    .seat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 4px;
+      border-radius: 6px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      font-size: 12px;
+      min-height: 52px;
+      text-align: center;
+    }
+
+    .seat:first-child {
+      border-right: 2px dashed #94a3b8; /* Tydelig vertikal skillelinje i midten */
+    }
+
+    .seat.Pige { border-top: 3px solid #ec4899; }
+    .seat.Dreng { border-top: 3px solid #3b82f6; }
+    
+    .seat-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .seat-info strong {
+      font-size: 12px;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+
+    .gender-badge { font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
     .Pige .gender-badge { background: #fce7f3; color: #be185d; }
     .Dreng .gender-badge { background: #dbeafe; color: #1d4ed8; }
     
-    .lock-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px; width: auto; }
+    .lock-btn { background: none; border: none; cursor: pointer; font-size: 12px; padding: 1px; width: auto; margin-top: 2px; }
 
     #print-student-list { display: none; }
 
@@ -770,7 +813,7 @@
       const roomW = room.clientWidth;
       const roomH = room.clientHeight;
 
-      const estimatedTableWidth = 200;
+      const estimatedTableWidth = 210;
       const estimatedTableHeight = 110;
 
       tableStates.forEach(state => {
@@ -788,9 +831,9 @@
       tableStates = [];
       const room = document.getElementById('room');
       const roomW = room ? room.clientWidth : 900;
-      const cols = Math.floor((roomW - 80) / 220) || 4;
+      const cols = Math.floor((roomW - 80) / 230) || 4;
       const startX = 40, startY = 60;
-      const stepX = 220, stepY = 140;
+      const stepX = 230, stepY = 140;
 
       for (let i = 0; i < totalTables; i++) {
         const col = i % cols;
@@ -810,11 +853,11 @@
       
       while (tableStates.length < totalTables) {
         const i = tableStates.length;
-        const cols = Math.floor((roomW - 80) / 220) || 4;
+        const cols = Math.floor((roomW - 80) / 230) || 4;
         const col = i % cols;
         const row = Math.floor(i / cols);
         tableStates.push({ 
-          x: Math.round((40 + col * 220) / GRID_SIZE) * GRID_SIZE, 
+          x: Math.round((40 + col * 230) / GRID_SIZE) * GRID_SIZE, 
           y: Math.round((60 + row * 140) / GRID_SIZE) * GRID_SIZE, 
           rotation: 0 
         });
@@ -1096,7 +1139,7 @@
       existingTables.forEach(t => t.remove());
 
       for (let t = 0; t < totalTables; t++) {
-        const state = tableStates[t] || { x: 20 + (t % 4) * 220, y: 50 + Math.floor(t / 4) * 140, rotation: 0 };
+        const state = tableStates[t] || { x: 20 + (t % 4) * 230, y: 50 + Math.floor(t / 4) * 140, rotation: 0 };
         
         const tableDiv = document.createElement('div');
         tableDiv.className = 'table';
