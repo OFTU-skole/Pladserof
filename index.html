@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bordplan Generator - Sky-synkroniseret</title>
+  <title>Bordplan Generator - Dynamisk Skalering</title>
   
   <!-- Firebase SDK Libraries -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -38,7 +38,7 @@
       background: white;
       padding: 24px;
       border-radius: 12px;
-      width: 320px;
+      width: clamp(280px, 80vw, 340px);
       box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
       display: flex;
       flex-direction: column;
@@ -66,8 +66,8 @@
 
     /* SAMMENKLAPPELIG VENSTRE SIDEMENU */
     .sidebar {
-      width: 290px;
-      min-width: 290px;
+      width: clamp(250px, 25vw, 290px);
+      min-width: 250px;
       background: white;
       border-right: 2px solid #e2e8f0;
       padding: 12px;
@@ -80,12 +80,10 @@
       transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Skjul sidemenu tilstand */
     .sidebar.collapsed {
-      margin-left: -290px;
+      margin-left: calc(-1 * clamp(250px, 25vw, 290px));
     }
 
-    /* Flydende knap til at åbne menuen når den er foldet sammen */
     .sidebar-toggle-floating {
       position: absolute;
       top: 12px;
@@ -151,12 +149,10 @@
       font-weight: bold;
       width: auto;
     }
-    .logout-btn-sm:hover { background: #0284c7; color: white; }
 
-    h1 { margin: 0; font-size: 16px; color: #0f172a; }
+    h1 { margin: 0; font-size: clamp(14px, 2vw, 18px); color: #0f172a; }
     .subtitle { color: #64748b; margin: 0; font-size: 11px; }
 
-    /* Kontroller */
     .control-section {
       background: #f8fafc;
       padding: 8px 10px;
@@ -173,16 +169,12 @@
     button:active { transform: scale(0.98); }
     button:hover { background: #1d4ed8; }
     button.success { background: #059669; }
-    button.success:hover { background: #047857; }
     button.print-btn { background: #0284c7; }
-    button.print-btn:hover { background: #0369a1; }
     button.secondary { background: #e2e8f0; color: #1e293b; }
-    button.secondary:hover { background: #cbd5e1; }
     
     label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500; font-size: 12px; }
     input[type="number"] { width: 50px; padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
 
-    /* Tællere */
     .counter-bar { display: flex; gap: 4px; }
     .counter-badge {
       flex: 1;
@@ -196,7 +188,6 @@
     .counter-badge.drenge { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .counter-badge.total { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
-    /* Historik Sektion */
     .history-panel {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
@@ -206,7 +197,7 @@
       flex-direction: column;
       gap: 5px;
     }
-    .history-title { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+    .history-title { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
     .history-list { display: flex; flex-direction: column; gap: 4px; }
     .history-item {
       display: flex;
@@ -218,10 +209,7 @@
       border: 1px solid #cbd5e1;
       font-size: 11px;
     }
-    .history-actions { display: flex; gap: 3px; }
-    .btn-sm { padding: 2px 5px; font-size: 10px; width: auto; }
 
-    /* Højre Hovedområde */
     .main-content {
       flex: 1;
       background: #cbd5e1;
@@ -235,7 +223,6 @@
       position: relative;
     }
 
-    /* Klasseværelse skærm */
     .room-container {
       background: #ffffff;
       border: 3px solid #64748b;
@@ -249,7 +236,6 @@
         linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
       background-size: 20px 20px;
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-      transition: all 0.2s ease-out;
     }
 
     .board-indicator {
@@ -261,18 +247,16 @@
       color: #475569;
       padding: 3px 18px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: clamp(10px, 1.2vw, 12px);
       font-weight: bold;
       letter-spacing: 1px;
       z-index: 10;
     }
 
-    /* ELEV-PANEL */
     .bottom-student-panel {
       background: white;
       padding: 8px 12px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       border: 1px solid #cbd5e1;
       width: 100%;
       display: flex;
@@ -312,7 +296,6 @@
       font-weight: 600;
       width: auto;
     }
-    .toggle-btn:hover { background: #e2e8f0; }
 
     .panel-body { display: flex; flex-direction: column; gap: 6px; }
     .bottom-student-panel.collapsed .panel-body { display: none; }
@@ -338,32 +321,30 @@
 
     .student-list { 
       display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
       gap: 5px; 
-      max-height: 130px; 
+      max-height: 120px; 
       overflow-y: auto; 
-      padding-right: 2px; 
     }
-    .student-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 12px; }
+    .student-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 11px; }
     .student-item.Pige { border-left: 3px solid #ec4899; }
     .student-item.Dreng { border-left: 3px solid #3b82f6; }
     .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; width: auto; padding: 0 3px; }
 
     /* ==========================================
-       BORD STYLING
+       DYNAMISK SKALERBART BORD STYLING
        ========================================== */
     .table {
       position: absolute;
-      width: 195px;
       background: white;
       border: 2px solid #64748b;
-      border-radius: 7px;
-      padding: 5px;
+      border-radius: 8px;
+      padding: 4px;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
       cursor: grab;
       user-select: none;
       touch-action: none;
-      transition: border-color 0.2s ease, background-color 0.2s ease;
+      transition: border-color 0.2s ease, background-color 0.2s ease, width 0.15s ease, height 0.15s ease;
     }
     .table:active { cursor: grabbing; z-index: 100 !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); }
     
@@ -378,7 +359,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 10px;
+      font-size: clamp(8px, 1vw, 11px);
       font-weight: 700;
       color: #64748b;
       margin-bottom: 3px;
@@ -388,20 +369,17 @@
     .table-title-group {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
 
     .table-lock-btn {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: clamp(8px, 0.9vw, 10px);
       cursor: pointer;
       width: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
       z-index: 30;
     }
 
@@ -409,7 +387,6 @@
       background: #fee2e2;
       border-color: #ef4444;
       color: #991b1b;
-      font-weight: bold;
     }
 
     .rotate-btn {
@@ -417,14 +394,13 @@
       color: #334155;
       border: 1px solid #cbd5e1;
       padding: 1px 4px;
-      border-radius: 4px;
-      font-size: 9px;
+      border-radius: 3px;
+      font-size: clamp(8px, 0.9vw, 10px);
       font-weight: 600;
       cursor: pointer;
       width: auto;
       z-index: 30;
     }
-    .rotate-btn:hover { background: #e2e8f0; }
 
     .seats {
       display: flex;
@@ -432,6 +408,7 @@
       gap: 3px;
       border-top: 1px dashed #cbd5e1;
       padding-top: 3px;
+      height: calc(100% - 20px);
     }
 
     .seat {
@@ -440,12 +417,11 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 3px;
+      padding: 3px 2px;
       border-radius: 5px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
-      font-size: 11px;
-      min-height: 48px;
+      font-size: clamp(9px, 1vw, 12px);
       text-align: center;
       cursor: grab;
       position: relative;
@@ -479,12 +455,12 @@
     }
 
     .seat-info strong {
-      font-size: 11px;
+      font-size: clamp(9px, 1.05vw, 12px);
       word-break: break-word;
       line-height: 1.1;
     }
 
-    .gender-badge { font-size: 8px; padding: 1px 3px; border-radius: 3px; font-weight: bold; }
+    .gender-badge { font-size: clamp(7px, 0.8vw, 9px); padding: 1px 3px; border-radius: 3px; font-weight: bold; }
     .Pige .gender-badge { background: #fce7f3; color: #be185d; }
     .Dreng .gender-badge { background: #dbeafe; color: #1d4ed8; }
     
@@ -492,10 +468,9 @@
       background: none; 
       border: none; 
       cursor: pointer; 
-      font-size: 11px; 
-      padding: 1px; 
+      font-size: clamp(9px, 1vw, 11px); 
+      padding: 0; 
       width: auto; 
-      margin-top: 1px;
       z-index: 30;
     }
 
@@ -520,7 +495,7 @@
 </head>
 <body>
 
-  <!-- LOGIN & OPRET BRUGER OVERLAY -->
+  <!-- LOGIN OVERLAY -->
   <div id="login-overlay">
     <div class="login-card">
       <h2>Bordplan Generator</h2>
@@ -559,7 +534,6 @@
 
       <p class="subtitle" id="studentCountText">Indlæser fra skyen...</p>
 
-      <!-- Primære Handlinger -->
       <button onclick="generateSeating()">🎲 Generér nye pladser</button>
       <button class="success" onclick="saveCurrentToHistory()">🔒 Gem & Lås til Historik</button>
       <button class="print-btn" onclick="printStudentList()">📋 Udskriv elevliste</button>
@@ -573,7 +547,6 @@
         <input type="checkbox" id="avoidRepeats" checked>
       </label>
 
-      <!-- Historik Sektion -->
       <div class="history-panel">
         <div class="history-title">Låste Historiske Bordplaner</div>
         <div class="history-list" id="historyList">
@@ -581,7 +554,6 @@
         </div>
       </div>
 
-      <!-- Rum & Bord Indstillinger -->
       <div class="control-section">
         <div class="control-row">
           <span>Antal Borde:</span>
@@ -593,7 +565,6 @@
         </label>
       </div>
 
-      <!-- Tællere -->
       <div class="counter-bar">
         <div class="counter-badge total">Total: <span id="countTotal">0</span></div>
         <div class="counter-badge piger">♀ <span id="countPiger">0</span></div>
@@ -605,15 +576,12 @@
 
     <!-- HØJRE KLASSELOKALE OMRAADE -->
     <div class="main-content">
-      
-      <!-- Knap til at åbne sidemenuen når den er lukket -->
       <button class="sidebar-toggle-floating" onclick="toggleSidebar()">▶ Åbn Menu</button>
 
       <div class="room-container" id="room">
         <div class="board-indicator">TAVLE / KATEDER</div>
       </div>
 
-      <!-- ELEV-PANEL -->
       <div class="bottom-student-panel collapsed" id="studentPanel">
         <div class="panel-header-toggle" onclick="toggleStudentPanel()">
           <strong style="font-size: 13px; color: #0f172a;">Administrer Elever & Sortering</strong>
@@ -650,9 +618,9 @@
 
   <script>
     // ==========================================
-    // 1. FIREBASE KONFIGURATION (Indsæt dine oplysninger her)
+    // 1. FIREBASE KONFIGURATION
     // ==========================================
-   const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyB1QWv4fooXl9_9YLqC60Z-83nxvzJYCns",
   authDomain: "bordplaner-of.firebaseapp.com",
   databaseURL: "https://bordplaner-of-default-rtdb.europe-west1.firebasedatabase.app",
@@ -702,6 +670,17 @@
     let currentSort = 'default';
     let draggedSeatIndex = null;
     const GRID_SIZE = 20;
+
+    // Beregn dynamisk bordstørrelse baseret på klasseværelsets bredde
+    function getDynamicTableDimensions() {
+      const room = document.getElementById('room');
+      const roomW = room ? room.clientWidth : 800;
+      
+      // Bordbredde mellem 150px og 220px alt efter skærm
+      const w = Math.max(150, Math.min(Math.floor(roomW / 4.2), 220));
+      const h = Math.round(w * 0.52); // Bevar proportioner
+      return { width: w, height: h };
+    }
 
     function cleanUsername(name) {
       return name.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
@@ -856,7 +835,6 @@
       });
     }
 
-    /* SIDEMENU SAMMENKLAPNING */
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('collapsed');
@@ -937,13 +915,12 @@
       const roomW = room.clientWidth;
       const roomH = room.clientHeight;
 
-      const estimatedTableWidth = 195;
-      const estimatedTableHeight = 100;
+      const dims = getDynamicTableDimensions();
 
       tableStates.forEach(state => {
         if (!state) return;
-        const maxLeft = Math.max(0, roomW - estimatedTableWidth);
-        const maxTop = Math.max(0, roomH - estimatedTableHeight);
+        const maxLeft = Math.max(0, roomW - dims.width);
+        const maxTop = Math.max(0, roomH - dims.height);
 
         if (state.x > maxLeft) state.x = Math.floor(maxLeft / GRID_SIZE) * GRID_SIZE;
         if (state.y > maxTop) state.y = Math.floor(maxTop / GRID_SIZE) * GRID_SIZE;
@@ -954,17 +931,18 @@
     function generateDefaultGridPositions() {
       tableStates = [];
       const room = document.getElementById('room');
-      const roomW = room ? room.clientWidth : 900;
-      const cols = Math.floor((roomW - 60) / 215) || 4;
-      const startX = 30, startY = 50;
-      const stepX = 215, stepY = 130;
+      const roomW = room ? room.clientWidth : 800;
+      const dims = getDynamicTableDimensions();
+      const stepX = dims.width + 20;
+      const stepY = dims.height + 30;
+      const cols = Math.max(2, Math.floor((roomW - 40) / stepX));
 
       for (let i = 0; i < totalTables; i++) {
         const col = i % cols;
         const row = Math.floor(i / cols);
         tableStates.push({
-          x: Math.round((startX + col * stepX) / GRID_SIZE) * GRID_SIZE,
-          y: Math.round((startY + row * stepY) / GRID_SIZE) * GRID_SIZE,
+          x: Math.round((20 + col * stepX) / GRID_SIZE) * GRID_SIZE,
+          y: Math.round((40 + row * stepY) / GRID_SIZE) * GRID_SIZE,
           rotation: 0,
           locked: false
         });
@@ -974,16 +952,19 @@
     function updateTableCount(newCount) {
       totalTables = Math.max(1, parseInt(newCount, 10) || 1);
       const room = document.getElementById('room');
-      const roomW = room ? room.clientWidth : 900;
+      const roomW = room ? room.clientWidth : 800;
+      const dims = getDynamicTableDimensions();
+      const stepX = dims.width + 20;
+      const stepY = dims.height + 30;
       
       while (tableStates.length < totalTables) {
         const i = tableStates.length;
-        const cols = Math.floor((roomW - 60) / 215) || 4;
+        const cols = Math.max(2, Math.floor((roomW - 40) / stepX));
         const col = i % cols;
         const row = Math.floor(i / cols);
         tableStates.push({ 
-          x: Math.round((30 + col * 215) / GRID_SIZE) * GRID_SIZE, 
-          y: Math.round((50 + row * 130) / GRID_SIZE) * GRID_SIZE, 
+          x: Math.round((20 + col * stepX) / GRID_SIZE) * GRID_SIZE, 
+          y: Math.round((40 + row * stepY) / GRID_SIZE) * GRID_SIZE, 
           rotation: 0,
           locked: false
         });
@@ -1248,7 +1229,6 @@
       document.getElementById('studentCountText').innerText = 
         `${students.length} elever (${piger} piger, ${drenge} drenge)`;
 
-      // Render Historik
       const historyList = document.getElementById('historyList');
       if (historyVersions.length === 0) {
         historyList.innerHTML = `<em style="font-size: 10px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>`;
@@ -1268,18 +1248,21 @@
         });
       }
 
-      // Render Klasselokale
       const room = document.getElementById('room');
       const existingTables = room.querySelectorAll('.table');
       existingTables.forEach(t => t.remove());
 
+      const dims = getDynamicTableDimensions();
+
       for (let t = 0; t < totalTables; t++) {
-        const state = tableStates[t] || { x: 20 + (t % 4) * 215, y: 50 + Math.floor(t / 4) * 130, rotation: 0, locked: false };
+        const state = tableStates[t] || { x: 20 + (t % 4) * (dims.width + 20), y: 40 + Math.floor(t / 4) * (dims.height + 30), rotation: 0, locked: false };
         
         const tableDiv = document.createElement('div');
         tableDiv.className = `table ${state.locked ? 'table-locked' : ''}`;
         tableDiv.style.left = `${state.x}px`;
         tableDiv.style.top = `${state.y}px`;
+        tableDiv.style.width = `${dims.width}px`;
+        tableDiv.style.height = `${dims.height}px`;
         tableDiv.style.transform = `rotate(${state.rotation || 0}deg)`;
         tableDiv.dataset.tableIndex = t;
 
@@ -1288,7 +1271,7 @@
             <div class="table-title-group">
               <span>BORD ${t + 1}</span>
               <button class="table-lock-btn" onclick="toggleTableLock(${t}, event)">
-                ${state.locked ? '🔒 Låst' : '🔓 Lås'}
+                ${state.locked ? '🔒' : '🔓'}
               </button>
             </div>
             <button class="rotate-btn" onclick="rotateTable(${t}, event)" ${state.locked ? 'disabled style="opacity:0.4"' : ''}>🔄 45°</button>
@@ -1318,10 +1301,9 @@
             `;
           } else {
             seatDiv.className = 'seat';
-            seatDiv.innerHTML = `<em style="color:#94a3b8; font-size:10px;">Tom plads</em>`;
+            seatDiv.innerHTML = `<em style="color:#94a3b8; font-size:9px;">Tom</em>`;
           }
 
-          // DRAG & DROP FOR ELEVER
           seatDiv.addEventListener('dragstart', (e) => {
             draggedSeatIndex = seatIdx;
             e.dataTransfer.setData('text/plain', seatIdx);
@@ -1354,7 +1336,6 @@
         room.appendChild(tableDiv);
       }
 
-      // Render Elevliste
       const studentList = document.getElementById('studentList');
       studentList.innerHTML = '';
 
@@ -1436,6 +1417,7 @@
       };
     }
 
+    // Lyt til ændringer i skærmstørrelse / rotation
     window.addEventListener('resize', () => {
       clampTablesInsideRoom();
     });
