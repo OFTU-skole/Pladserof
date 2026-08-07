@@ -36,23 +36,23 @@
 
     .login-card {
       background: white;
-      padding: 30px;
+      padding: 24px;
       border-radius: 12px;
-      width: 360px;
+      width: 320px;
       box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
     }
 
-    .login-card h2 { margin: 0; font-size: 20px; color: #0f172a; text-align: center; }
-    .login-card p { margin: 0; font-size: 13px; color: #64748b; text-align: center; }
+    .login-card h2 { margin: 0; font-size: 18px; color: #0f172a; text-align: center; }
+    .login-card p { margin: 0; font-size: 12px; color: #64748b; text-align: center; }
 
-    .input-group { display: flex; flex-direction: column; gap: 5px; }
-    .input-group label { font-size: 12px; font-weight: 600; color: #475569; }
-    .input-group input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-group label { font-size: 11px; font-weight: 600; color: #475569; }
+    .input-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
-    .login-actions { display: flex; gap: 10px; margin-top: 5px; }
+    .login-actions { display: flex; gap: 8px; margin-top: 4px; }
 
     /* Hovedlayout */
     .app-container {
@@ -60,32 +60,82 @@
       height: 100vh;
       height: 100dvh;
       width: 100vw;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Venstre Sidepanel */
+    /* SAMMENKLAPPELIG VENSTRE SIDEMENU */
     .sidebar {
-      width: 340px;
-      min-width: 340px;
+      width: 290px;
+      min-width: 290px;
       background: white;
       border-right: 2px solid #e2e8f0;
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       box-shadow: 2px 0 8px rgba(0,0,0,0.03);
       overflow-y: auto;
-      z-index: 20;
+      z-index: 30;
+      transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    /* Skjul sidemenu tilstand */
+    .sidebar.collapsed {
+      margin-left: -290px;
+    }
+
+    /* Flydende knap til at åbne menuen når den er foldet sammen */
+    .sidebar-toggle-floating {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 25;
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      display: none;
+    }
+
+    .sidebar.collapsed + .main-content .sidebar-toggle-floating {
+      display: inline-flex;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .toggle-sidebar-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      width: auto;
+    }
+    .toggle-sidebar-btn:hover { background: #e2e8f0; }
 
     .user-badge-bar {
       background: #e0f2fe;
       border: 1px solid #bae6fd;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: 11px;
       color: #0369a1;
       font-weight: 600;
     }
@@ -94,32 +144,32 @@
       background: #38bdf8;
       color: #0c4a6e;
       border: none;
-      padding: 3px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
       width: auto;
     }
     .logout-btn-sm:hover { background: #0284c7; color: white; }
 
-    h1 { margin: 0; font-size: 18px; color: #0f172a; }
-    .subtitle { color: #64748b; margin: 0 0 4px 0; font-size: 12px; }
+    h1 { margin: 0; font-size: 16px; color: #0f172a; }
+    .subtitle { color: #64748b; margin: 0; font-size: 11px; }
 
     /* Kontroller */
     .control-section {
       background: #f8fafc;
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
       border: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .control-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 500; }
+    .control-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 500; }
     
-    button { background: #2563eb; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; width: 100%; transition: transform 0.1s ease; }
+    button { background: #2563eb; color: white; border: none; padding: 7px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; width: 100%; transition: transform 0.1s ease; }
     button:active { transform: scale(0.98); }
     button:hover { background: #1d4ed8; }
     button.success { background: #059669; }
@@ -129,17 +179,17 @@
     button.secondary { background: #e2e8f0; color: #1e293b; }
     button.secondary:hover { background: #cbd5e1; }
     
-    label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
-    input[type="number"] { width: 60px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+    label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500; font-size: 12px; }
+    input[type="number"] { width: 50px; padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
 
     /* Tællere */
-    .counter-bar { display: flex; gap: 6px; }
+    .counter-bar { display: flex; gap: 4px; }
     .counter-badge {
       flex: 1;
-      padding: 5px;
-      border-radius: 6px;
+      padding: 4px;
+      border-radius: 5px;
       font-weight: 600;
-      font-size: 12px;
+      font-size: 11px;
       text-align: center;
     }
     .counter-badge.piger { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
@@ -150,35 +200,35 @@
     .history-panel {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 6px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
-    .history-title { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-    .history-list { display: flex; flex-direction: column; gap: 6px; }
+    .history-title { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+    .history-list { display: flex; flex-direction: column; gap: 4px; }
     .history-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: white;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 4px 8px;
+      border-radius: 5px;
       border: 1px solid #cbd5e1;
-      font-size: 12px;
+      font-size: 11px;
     }
-    .history-actions { display: flex; gap: 4px; }
-    .btn-sm { padding: 3px 6px; font-size: 11px; width: auto; }
+    .history-actions { display: flex; gap: 3px; }
+    .btn-sm { padding: 2px 5px; font-size: 10px; width: auto; }
 
     /* Højre Hovedområde */
     .main-content {
       flex: 1;
       background: #cbd5e1;
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       height: 100vh;
       height: 100dvh;
       overflow: hidden;
@@ -188,8 +238,8 @@
     /* Klasseværelse skærm */
     .room-container {
       background: #ffffff;
-      border: 4px solid #64748b;
-      border-radius: 12px;
+      border: 3px solid #64748b;
+      border-radius: 10px;
       position: relative;
       overflow: hidden;
       width: 100%;
@@ -204,14 +254,14 @@
 
     .board-indicator {
       position: absolute;
-      top: 10px;
+      top: 8px;
       left: 50%;
       transform: translateX(-50%);
       background: #cbd5e1;
       color: #475569;
-      padding: 4px 24px;
+      padding: 3px 18px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       letter-spacing: 1px;
       z-index: 10;
@@ -220,14 +270,14 @@
     /* ELEV-PANEL */
     .bottom-student-panel {
       background: white;
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       border: 1px solid #cbd5e1;
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s ease;
       z-index: 40;
       flex-shrink: 0;
@@ -235,10 +285,10 @@
 
     .bottom-student-panel:not(.collapsed) {
       position: absolute;
-      bottom: 12px;
-      left: 12px;
-      right: 12px;
-      width: calc(100% - 24px);
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      width: calc(100% - 20px);
       background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(8px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
@@ -256,30 +306,30 @@
       background: #f1f5f9;
       color: #334155;
       border: 1px solid #cbd5e1;
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 11px;
       font-weight: 600;
       width: auto;
     }
     .toggle-btn:hover { background: #e2e8f0; }
 
-    .panel-body { display: flex; flex-direction: column; gap: 8px; }
+    .panel-body { display: flex; flex-direction: column; gap: 6px; }
     .bottom-student-panel.collapsed .panel-body { display: none; }
 
-    .student-form { display: flex; gap: 8px; flex-wrap: wrap; }
-    .student-form input { flex: 1; min-width: 140px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
-    .student-form select { padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
-    .student-form button { width: auto; }
+    .student-form { display: flex; gap: 6px; flex-wrap: wrap; }
+    .student-form input { flex: 1; min-width: 120px; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 12px; }
+    .student-form select { padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 12px; }
+    .student-form button { width: auto; padding: 5px 10px; }
 
-    .sort-controls { display: flex; gap: 6px; }
+    .sort-controls { display: flex; gap: 4px; }
     .sort-btn {
       background: #f1f5f9;
       color: #475569;
       border: 1px solid #cbd5e1;
-      padding: 3px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
       width: auto;
@@ -288,27 +338,27 @@
 
     .student-list { 
       display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-      gap: 6px; 
-      max-height: 150px; 
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+      gap: 5px; 
+      max-height: 130px; 
       overflow-y: auto; 
-      padding-right: 4px; 
+      padding-right: 2px; 
     }
-    .student-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; }
+    .student-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 12px; }
     .student-item.Pige { border-left: 3px solid #ec4899; }
     .student-item.Dreng { border-left: 3px solid #3b82f6; }
-    .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; width: auto; padding: 0 4px; }
+    .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; width: auto; padding: 0 3px; }
 
     /* ==========================================
-       BORD STYLING M. KLAR LÅSE-INDIKATOR
+       BORD STYLING
        ========================================== */
     .table {
       position: absolute;
-      width: 210px;
+      width: 195px;
       background: white;
       border: 2px solid #64748b;
-      border-radius: 8px;
-      padding: 6px;
+      border-radius: 7px;
+      padding: 5px;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
       cursor: grab;
       user-select: none;
@@ -317,7 +367,6 @@
     }
     .table:active { cursor: grabbing; z-index: 100 !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); }
     
-    /* Låst Bord Style */
     .table.table-locked {
       background: #e2e8f0 !important;
       border: 2px solid #334155 !important;
@@ -332,28 +381,27 @@
       font-size: 10px;
       font-weight: 700;
       color: #64748b;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       padding: 0 2px;
     }
 
     .table-title-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
 
-    /* Bord Låseknap */
     .table-lock-btn {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 10px;
       cursor: pointer;
       width: auto;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       z-index: 30;
     }
 
@@ -368,9 +416,9 @@
       background: #f1f5f9;
       color: #334155;
       border: 1px solid #cbd5e1;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       cursor: pointer;
       width: auto;
@@ -378,28 +426,26 @@
     }
     .rotate-btn:hover { background: #e2e8f0; }
 
-    /* Vertikal opdeling (Side om side) med stiplet midterlinje */
     .seats {
       display: flex;
       flex-direction: row;
-      gap: 4px;
+      gap: 3px;
       border-top: 1px dashed #cbd5e1;
-      padding-top: 4px;
+      padding-top: 3px;
     }
 
-    /* SÆDE STYLING OG DRAG-AND-DROP */
     .seat {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 4px;
-      border-radius: 6px;
+      padding: 4px 3px;
+      border-radius: 5px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
-      font-size: 12px;
-      min-height: 52px;
+      font-size: 11px;
+      min-height: 48px;
       text-align: center;
       cursor: grab;
       position: relative;
@@ -412,7 +458,6 @@
     .seat.Pige { border-top: 3px solid #ec4899; }
     .seat.Dreng { border-top: 3px solid #3b82f6; }
     
-    /* VISUEL INDIKATOR NÅR EN ELEV ER LÅST */
     .seat.seat-locked {
       background: #fef3c7 !important;
       border: 1px solid #d97706 !important;
@@ -428,18 +473,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 1px;
       width: 100%;
       pointer-events: none;
     }
 
     .seat-info strong {
-      font-size: 12px;
+      font-size: 11px;
       word-break: break-word;
-      line-height: 1.2;
+      line-height: 1.1;
     }
 
-    .gender-badge { font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
+    .gender-badge { font-size: 8px; padding: 1px 3px; border-radius: 3px; font-weight: bold; }
     .Pige .gender-badge { background: #fce7f3; color: #be185d; }
     .Dreng .gender-badge { background: #dbeafe; color: #1d4ed8; }
     
@@ -447,10 +492,10 @@
       background: none; 
       border: none; 
       cursor: pointer; 
-      font-size: 12px; 
+      font-size: 11px; 
       padding: 1px; 
       width: auto; 
-      margin-top: 2px;
+      margin-top: 1px;
       z-index: 30;
     }
 
@@ -501,16 +546,18 @@
   <div class="app-container">
     
     <!-- VENSTRE SIDEMENU -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>Bordplaner</h1>
+        <button class="toggle-sidebar-btn" onclick="toggleSidebar()">◀ Skjul menu</button>
+      </div>
+
       <div class="user-badge-bar">
         <span>👤 <span id="currentUsernameText">...</span></span>
         <button class="logout-btn-sm" onclick="logout()">🚪 Log ud</button>
       </div>
 
-      <div>
-        <h1>Bordplaner</h1>
-        <p class="subtitle" id="studentCountText">Indlæser fra skyen...</p>
-      </div>
+      <p class="subtitle" id="studentCountText">Indlæser fra skyen...</p>
 
       <!-- Primære Handlinger -->
       <button onclick="generateSeating()">🎲 Generér nye pladser</button>
@@ -528,9 +575,9 @@
 
       <!-- Historik Sektion -->
       <div class="history-panel">
-        <div class="history-title">Låste Historiske Bordplaner (Max 5)</div>
+        <div class="history-title">Låste Historiske Bordplaner</div>
         <div class="history-list" id="historyList">
-          <em style="font-size: 11px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>
+          <em style="font-size: 10px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>
         </div>
       </div>
 
@@ -558,6 +605,10 @@
 
     <!-- HØJRE KLASSELOKALE OMRAADE -->
     <div class="main-content">
+      
+      <!-- Knap til at åbne sidemenuen når den er lukket -->
+      <button class="sidebar-toggle-floating" onclick="toggleSidebar()">▶ Åbn Menu</button>
+
       <div class="room-container" id="room">
         <div class="board-indicator">TAVLE / KATEDER</div>
       </div>
@@ -565,12 +616,12 @@
       <!-- ELEV-PANEL -->
       <div class="bottom-student-panel collapsed" id="studentPanel">
         <div class="panel-header-toggle" onclick="toggleStudentPanel()">
-          <strong style="font-size: 14px; color: #0f172a;">Administrer Elever & Sortering</strong>
+          <strong style="font-size: 13px; color: #0f172a;">Administrer Elever & Sortering</strong>
           <button class="toggle-btn" id="togglePanelBtn">🔼 Vis Elevliste</button>
         </div>
 
         <div class="panel-body">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
             <form class="student-form" onsubmit="addStudent(event)">
               <input type="text" id="newName" placeholder="Elevens navn" required>
               <select id="newGender">
@@ -581,7 +632,7 @@
             </form>
 
             <div class="sort-controls">
-              <span style="font-size: 12px; color: #64748b; align-self: center;">Sorter efter:</span>
+              <span style="font-size: 11px; color: #64748b; align-self: center;">Sorter:</span>
               <button class="sort-btn active" id="sortDefault" onclick="setSortMode('default')">Standard</button>
               <button class="sort-btn" id="sortAlpha" onclick="setSortMode('alpha')">A-Å</button>
               <button class="sort-btn" id="sortGender" onclick="setSortMode('gender')">Køn</button>
@@ -601,7 +652,7 @@
     // ==========================================
     // 1. FIREBASE KONFIGURATION (Indsæt dine oplysninger her)
     // ==========================================
-    const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyB1QWv4fooXl9_9YLqC60Z-83nxvzJYCns",
   authDomain: "bordplaner-of.firebaseapp.com",
   databaseURL: "https://bordplaner-of-default-rtdb.europe-west1.firebasedatabase.app",
@@ -805,6 +856,16 @@
       });
     }
 
+    /* SIDEMENU SAMMENKLAPNING */
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
+      
+      setTimeout(() => {
+        clampTablesInsideRoom();
+      }, 260);
+    }
+
     function printStudentList() {
       const printContainer = document.getElementById('print-student-list');
       const dateStr = new Date().toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -876,8 +937,8 @@
       const roomW = room.clientWidth;
       const roomH = room.clientHeight;
 
-      const estimatedTableWidth = 210;
-      const estimatedTableHeight = 110;
+      const estimatedTableWidth = 195;
+      const estimatedTableHeight = 100;
 
       tableStates.forEach(state => {
         if (!state) return;
@@ -894,9 +955,9 @@
       tableStates = [];
       const room = document.getElementById('room');
       const roomW = room ? room.clientWidth : 900;
-      const cols = Math.floor((roomW - 80) / 230) || 4;
-      const startX = 40, startY = 60;
-      const stepX = 230, stepY = 140;
+      const cols = Math.floor((roomW - 60) / 215) || 4;
+      const startX = 30, startY = 50;
+      const stepX = 215, stepY = 130;
 
       for (let i = 0; i < totalTables; i++) {
         const col = i % cols;
@@ -917,12 +978,12 @@
       
       while (tableStates.length < totalTables) {
         const i = tableStates.length;
-        const cols = Math.floor((roomW - 80) / 230) || 4;
+        const cols = Math.floor((roomW - 60) / 215) || 4;
         const col = i % cols;
         const row = Math.floor(i / cols);
         tableStates.push({ 
-          x: Math.round((40 + col * 230) / GRID_SIZE) * GRID_SIZE, 
-          y: Math.round((60 + row * 140) / GRID_SIZE) * GRID_SIZE, 
+          x: Math.round((30 + col * 215) / GRID_SIZE) * GRID_SIZE, 
+          y: Math.round((50 + row * 130) / GRID_SIZE) * GRID_SIZE, 
           rotation: 0,
           locked: false
         });
@@ -1190,7 +1251,7 @@
       // Render Historik
       const historyList = document.getElementById('historyList');
       if (historyVersions.length === 0) {
-        historyList.innerHTML = `<em style="font-size: 11px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>`;
+        historyList.innerHTML = `<em style="font-size: 10px; color: #64748b;">Ingen gemte versioner endnu. Klik på "Gem & Lås" for at gemme en bordplan.</em>`;
       } else {
         historyList.innerHTML = '';
         historyVersions.forEach(ver => {
@@ -1213,7 +1274,7 @@
       existingTables.forEach(t => t.remove());
 
       for (let t = 0; t < totalTables; t++) {
-        const state = tableStates[t] || { x: 20 + (t % 4) * 230, y: 50 + Math.floor(t / 4) * 140, rotation: 0, locked: false };
+        const state = tableStates[t] || { x: 20 + (t % 4) * 215, y: 50 + Math.floor(t / 4) * 130, rotation: 0, locked: false };
         
         const tableDiv = document.createElement('div');
         tableDiv.className = `table ${state.locked ? 'table-locked' : ''}`;
@@ -1257,7 +1318,7 @@
             `;
           } else {
             seatDiv.className = 'seat';
-            seatDiv.innerHTML = `<em style="color:#94a3b8; font-size:11px;">Tom plads</em>`;
+            seatDiv.innerHTML = `<em style="color:#94a3b8; font-size:10px;">Tom plads</em>`;
           }
 
           // DRAG & DROP FOR ELEVER
@@ -1331,10 +1392,7 @@
       const currentIdx = parseInt(element.dataset.tableIndex, 10);
 
       element.onpointerdown = function(e) {
-        // Tjek om bordet er låst
         if (tableStates[currentIdx] && tableStates[currentIdx].locked) return;
-
-        // Undgå at flytte bordet hvis man klikker på knapper eller elevfelter
         if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.seat')) return;
         
         e.preventDefault();
